@@ -15,30 +15,47 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class Driver {
 	
-	static String [] keys = //get your own
-			
-	public static void main(String[] args) throws TwitterException, FileNotFoundException, UnsupportedEncodingException {
-		PrintWriter pw = new PrintWriter("data.txt", "UTF-8");
+	//get your own
+	static String [] keys = {};
+	
+	public static void getTweets(String query, int n, String filename) throws FileNotFoundException, UnsupportedEncodingException, TwitterException, InterruptedException{
+		PrintWriter pw = new PrintWriter(filename + ".txt", "UTF-8");
 		
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true).setOAuthConsumerKey(keys[0]).setOAuthConsumerSecret(keys[1]).setOAuthAccessToken(keys[2]).setOAuthAccessTokenSecret(keys[3]);
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		Twitter t = tf.getInstance();
 		
-		Query q =  new Query("#ClimateChange");
-		//q.setGeoCode(new GeoLocation(43.653908, -79.384293), 1000000, Query.KILOMETERS);
+		//Query
+		Query q =  new Query(query);
+		q.setGeoCode(new GeoLocation(43.653908, -79.384293), 1000000, Query.KILOMETERS);
 		
-		q.setCount(100);
-		QueryResult r = t.search(q);
-		for(Status s: r.getTweets()){
-			System.out.println(s.getText());
-			//if(s.getGeoLocation() != null){
-				pw.println(s.getGeoLocation() + "\t" + s.getText());
-			//}
-		}
+		int numTweets = n;
+		int count = 0;
+		boolean flag = true;
 		
-		pw.close();
-
+		while(flag){
+			Thread.sleep(61000);
+			q.setCount(100);
+			QueryResult r = t.search(q);
+			for(Status s: r.getTweets()){
+				if(s.getGeoLocation() != null){
+					System.out.println(s.getText());
+					pw.println(s.getGeoLocation() + "\t" + s.getText());
+					count++;
+					if(count >= numTweets){
+						flag = false;
+						pw.close();
+						break;
+					}
+				}
+			}
+			q.setMaxId(r.getTweets().get(r.getTweets().size()-1).getId());//gets the last ID of the last queried - only returns the next batch below this
+		}	
+	}
+	
+	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, TwitterException, InterruptedException{
+		getTweets("#ClimateChange", 512, "temp3");
 	}
 
 }
