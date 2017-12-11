@@ -16,7 +16,7 @@ import twitter4j.conf.ConfigurationBuilder;
 public class Driver {
 	
 	//get your own
-	static String [] keys = {};
+	static String [] keys = {};//get your own
 	
 	public static void getTweets(String query, int n, String filename) throws FileNotFoundException, UnsupportedEncodingException, TwitterException, InterruptedException{
 		PrintWriter pw = new PrintWriter(filename + ".txt", "UTF-8");
@@ -28,20 +28,19 @@ public class Driver {
 		
 		//Query
 		Query q =  new Query(query);
-		q.setGeoCode(new GeoLocation(43.653908, -79.384293), 1000000, Query.KILOMETERS);
+		//q.setGeoCode(new GeoLocation(43.653908, -79.384293), 1000000, Query.KILOMETERS);
 		
 		int numTweets = n;
 		int count = 0;
 		boolean flag = true;
 		
 		while(flag){
-			Thread.sleep(61000);
 			q.setCount(100);
 			QueryResult r = t.search(q);
 			for(Status s: r.getTweets()){
-				if(s.getGeoLocation() != null){
+				if(true){
 					System.out.println(s.getText());
-					pw.println(s.getGeoLocation() + "\t" + s.getText());
+					pw.println(s.getUser() + "\t" + s.getGeoLocation() + "\t" + s.getText());
 					count++;
 					if(count >= numTweets){
 						flag = false;
@@ -51,11 +50,12 @@ public class Driver {
 				}
 			}
 			q.setMaxId(r.getTweets().get(r.getTweets().size()-1).getId());//gets the last ID of the last queried - only returns the next batch below this
+			Thread.sleep(61000);
 		}	
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, TwitterException, InterruptedException{
-		getTweets("#ClimateChange", 512, "temp3");
+		getTweets("#ClimateHoax", 512, "temp4");
 	}
 
 }
