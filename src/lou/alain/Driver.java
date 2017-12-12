@@ -17,9 +17,8 @@ public class Driver {
 	
 	//get your own
 	static String [] keys = {};//get your own
-	
-	public static void getTweets(String query, int n, String filename) throws FileNotFoundException, UnsupportedEncodingException, TwitterException, InterruptedException{
-		PrintWriter pw = new PrintWriter(filename + ".txt", "UTF-8");
+	public static void getTweets(String query, int n, String filename, TweetParser tP) throws FileNotFoundException, UnsupportedEncodingException, TwitterException, InterruptedException{
+		
 		
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true).setOAuthConsumerKey(keys[0]).setOAuthConsumerSecret(keys[1]).setOAuthAccessToken(keys[2]).setOAuthAccessTokenSecret(keys[3]);
@@ -40,22 +39,28 @@ public class Driver {
 			for(Status s: r.getTweets()){
 				if(true){
 					System.out.println(s.getText());
-					pw.println(s.getUser() + "\t" + s.getGeoLocation() + "\t" + s.getText());
+					tP.add(s.getUser());
 					count++;
 					if(count >= numTweets){
 						flag = false;
-						pw.close();
 						break;
 					}
 				}
 			}
 			q.setMaxId(r.getTweets().get(r.getTweets().size()-1).getId());//gets the last ID of the last queried - only returns the next batch below this
 			Thread.sleep(61000);
-		}	
+		}
+		
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, TwitterException, InterruptedException{
-		getTweets("#ClimateHoax", 512, "temp4");
+		TweetParser tP = new TweetParser("temp4");
+		try{
+			getTweets("#ClimateHoax", 512, "temp4", tP);
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+			tP.close();
+		}
 	}
 
 }
